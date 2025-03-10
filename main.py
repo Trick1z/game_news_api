@@ -190,33 +190,60 @@ class editData(BaseModel):
     SUB_DETAIL: str
     YOUTUBE: str
     STEAM: str
-    
 
 
-app.put('/put.edit')
+@app.put('/put.edit')
 def put_edit_data(data: editData):
     try:
-        res = query.put(f"""
-                        START TRANSACTION;
+        res = query.put(
+            f"UPDATE main SET MAIN_TITLE = '{data.MAIN_TITLE}', MAIN_DESC = '{data.MAIN_DESC}' WHERE MAIN_ID = {data.MAIN_ID};")
+        res2 = query.put(
+            f"UPDATE img SET IMG_IMG = '{data.IMG_IMG}' WHERE MAIN_ID = {data.MAIN_ID};")
+        res3 = query.put(
+            f"UPDATE sub SET SUB_TITLE = '{data.SUB_TITLE}', SUB_DESC = '{data.SUB_DESC}', SUB_DETAIL = '{data.SUB_DETAIL}', YOUTUBE = '{data.YOUTUBE}', STEAM = '{data.STEAM}' WHERE MAIN_ID = {data.MAIN_ID};")
 
-                        UPDATE main
-                        SET MAIN_TITLE = '{data.MAIN_TITLE}',
-                            MAIN_DESC = '{data.MAIN_DESC}'
-                        WHERE MAIN_ID = {data.MAIN_ID};
+        return {"main": res,
+                "img": res2,
+                "sub": res3
+                }
 
-                        UPDATE img
-                        SET IMG_IMG = '{data.IMG_IMG}'
-                        WHERE MAIN_ID = {data.MAIN_ID};
+    except Exception as e:
+        return e
 
-                        UPDATE sub
-                        SET SUB_TITLE = '{data.SUB_TITLE}',
-                            SUB_DESC = '{data.SUB_DESC}',
-                            SUB_DETAIL = '{data.SUB_DETAIL}',
-                            YOUTUBE = '{data.YOUTUBE}',
-                            STEAM = '{data.STEAM}'
-                        WHERE MAIN_ID = {data.MAIN_ID};
 
-                        COMMIT;""")
+@app.put('/delete.sf_del.ref:mainID={id}')
+def sf_del(id: int):
+    try:
+        res = query.put(f"UPDATE main SET DEL_FRAG = 'Y' WHERE MAIN_ID = {id}")
+        res2 = query.put(f"UPDATE img SET DEL_FRAG = 'Y' WHERE MAIN_ID = {id}")
+        res3 = query.put(f"UPDATE sub SET DEL_FRAG = 'Y' WHERE MAIN_ID = {id}")
+        return {"main": res,
+                "img": res2,
+                "sub": res3}
+    except Exception as e:
+        return e
+
+
+# user side
+
+@app.get('/get.user.main')
+def get_edit_data(id: int):
+    try:
+        res = query.get(f"""
+                       SELECT
+  m.MAIN_ID,
+  m.MAIN_TITLE,
+  m.MAIN_DESC,
+  i.IMG_IMG 
+FROM
+  main m
+  INNER JOIN img i ON m.MAIN_ID = i.MAIN_ID 
+WHERE
+  m.DEL_FRAG = 'N'
+  AND
+  m.MAIN_ID = m.MAIN_ID
+
+                        """)
         return res
     except Exception as e:
         return e
