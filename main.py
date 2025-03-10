@@ -177,24 +177,46 @@ def get_edit_data(id: int):
         return res
     except Exception as e:
         return e
-    
-    
-# put edit 
+
+
+# put edit
 class editData(BaseModel):
-    MAIN_ID : int 
+    MAIN_ID: int
     MAIN_TITLE: str
-    MAIN_DESC :str
-    IMG_IMG : str
-    SUB_TITLE :str
-    SUB_DESC :str
-    SUB_DETAIL :str
-    YOUTUBE : str
-    STEAM : str
+    MAIN_DESC: str
+    IMG_IMG: str
+    SUB_TITLE: str
+    SUB_DESC: str
+    SUB_DETAIL: str
+    YOUTUBE: str
+    STEAM: str
     
+
+
 app.put('/put.edit')
-def put_edit_data(data : editData):
+def put_edit_data(data: editData):
     try:
-        res = 
-        return
+        res = query.put(f"""
+                        START TRANSACTION;
+
+                        UPDATE main
+                        SET MAIN_TITLE = '{data.MAIN_TITLE}',
+                            MAIN_DESC = '{data.MAIN_DESC}'
+                        WHERE MAIN_ID = {data.MAIN_ID};
+
+                        UPDATE img
+                        SET IMG_IMG = '{data.IMG_IMG}'
+                        WHERE MAIN_ID = {data.MAIN_ID};
+
+                        UPDATE sub
+                        SET SUB_TITLE = '{data.SUB_TITLE}',
+                            SUB_DESC = '{data.SUB_DESC}',
+                            SUB_DETAIL = '{data.SUB_DETAIL}',
+                            YOUTUBE = '{data.YOUTUBE}',
+                            STEAM = '{data.STEAM}'
+                        WHERE MAIN_ID = {data.MAIN_ID};
+
+                        COMMIT;""")
+        return res
     except Exception as e:
         return e
